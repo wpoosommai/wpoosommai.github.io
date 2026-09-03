@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weerawat · Dashboard</title>
+<style>
+  :root{--bg:#0b1b33;--card:#0f2444;--card2:#12325c;--line:#1c3c68;--ink:#e8eef7;
+    --muted:#8ba6c9;--accent:#63b3ff;--ok:#5fd39a;--amber:#f2c14e}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);line-height:1.6;
+    font-family:"Sarabun","Noto Sans Thai","Helvetica Neue",system-ui,-apple-system,sans-serif}
+  .wrap{max-width:1040px;margin:0 auto;padding:40px 20px 70px}
+  header h1{font-size:26px;font-weight:700;color:#fff}
+  header p{color:var(--muted);font-size:15px;margin-top:2px}
+  h2{font-size:17px;font-weight:600;margin:34px 0 12px;color:#fff}
+  h2 span{color:var(--muted);font-size:13px;font-weight:400;margin-left:8px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px 16px;
+    display:block;color:inherit;text-decoration:none;transition:border-color .12s,background .12s}
+  a.card:hover{border-color:var(--accent);background:var(--card2)}
+  .card .t{font-size:15px;font-weight:600;color:#fff}
+  .card .d{font-size:13px;color:var(--muted);margin-top:4px}
+  .card .m{font-size:12px;margin-top:9px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .tag{background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:2px 9px;color:var(--muted)}
+  .live{color:var(--ok)} .soon{color:var(--amber)} .local{color:var(--muted)}
+  .arrow{color:var(--accent)}
+  footer{margin-top:44px;color:var(--muted);font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>ครูวีระวัฒน์ ภูสมหมาย</h1>
+  <p>สาขาเทคโนโลยีอิเล็กทรอนิกส์ · Electronics IoT Lab — ระบบและงานที่พัฒนาเอง</p>
+</header>
+<div id="app"></div>
+<footer>อัปเดต <span id="upd"></span> · โฮสต์บน GitHub Pages</footer>
+</div>
+
+<script>
+const SECTIONS = [
+ { h:"ระบบการเรียนการสอน", note:"เครื่องมือช่วยสอน/ตรวจงาน",
+   items:[
+    {t:"ระบบตรวจงานอัตโนมัติ (Discord + AI)", d:"นักศึกษาส่งงานในห้อง Discord → บอทตรวจตามเกณฑ์ด้วย AI → ให้คะแนน+ฟีดแบ็กภาษาไทย → สรุปเป็นตาราง",
+     url:"https://wpoosommai.github.io/grader-report/", state:"live", tags:["Python","discord.py","Groq AI"]},
+    {t:"LearnX — ระบบใบงาน/เนื้อหา", d:"ระบบส่งงานและเนื้อหารายวิชา",
+     url:"https://nextvora.duckdns.org:37478/learnx/", state:"live", tags:["Web"]},
+    {t:"เว็บห้องเรียน / ข้อสอบออนไลน์", d:"หน้าเว็บรายวิชา + แบบทดสอบ",
+     url:"https://wpoosommai.github.io/classroom-website/", state:"live", tags:["GitHub Pages"]},
+   ]},
+ { h:"ESP32 / IoT", note:"ฮาร์ดแวร์ + เซนเซอร์",
+   items:[
+    {t:"AiESP32 — MicroPython บน ESP32-S3", d:"อ่านค่าเซนเซอร์ + ส่งขึ้น MQTT (topic esp32s3/system)",
+     url:"", state:"local", tags:["MicroPython","MQTT"]},
+    {t:"esp32s3-micropython — เทมเพลตโปรเจกต์", d:"WiFi + WS2812B NeoPixel + deploy script",
+     url:"", state:"local", tags:["MicroPython","ESP32-S3"]},
+    {t:"IoTOS — iOS IoT Dashboard", d:"แอป iOS เชื่อม MQTT broker แสดงผลอุปกรณ์ IoT",
+     url:"", state:"soon", tags:["Swift","MQTT"]},
+   ]},
+ { h:"หุ่นยนต์ / AI", note:"",
+   items:[
+    {t:"AiRobot — Raspberry Pi + Claude", d:"หุ่นยนต์ Pi Zero 2W ควบคุมด้วย AI (GPS, GPIO, กล้อง)",
+     url:"", state:"local", tags:["Python","Raspberry Pi","Claude API"]},
+    {t:"Spider Robot — หุ่นยนต์แมงมุม", d:"หุ่นยนต์ 6 ขา (LectureRoom211)",
+     url:"", state:"local", tags:["ESP-IDF"]},
+   ]},
+ { h:"แอปพลิเคชัน", note:"",
+   items:[
+    {t:"LifeTrack Android — GPS Tracker", d:"ส่งพิกัดเรียลไทมผ่าน MQTT ขึ้นแผนที่ DailyLife/LifeTrack",
+     url:"", state:"local", tags:["Kotlin","MQTT"]},
+   ]},
+];
+
+const S = {live:["● ออนไลน์","live"], soon:["○ กำลังพัฒนา","soon"], local:["◆ ในเครื่อง","local"]};
+const el = document.getElementById("app");
+SECTIONS.forEach(sec=>{
+  const h = document.createElement("h2");
+  h.innerHTML = sec.h + (sec.note?` <span>${sec.note}</span>`:"");
+  el.appendChild(h);
+  const g = document.createElement("div"); g.className="grid";
+  sec.items.forEach(it=>{
+    const [lbl,cls] = S[it.state]||S.local;
+    const inner = `<div class="t">${it.t} ${it.url?'<span class="arrow">→</span>':''}</div>
+      <div class="d">${it.d}</div>
+      <div class="m"><span class="${cls}">${lbl}</span>${it.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>`;
+    let node;
+    if(it.url){ node=document.createElement("a"); node.href=it.url; node.className="card"; }
+    else { node=document.createElement("div"); node.className="card"; }
+    node.innerHTML = inner;
+    g.appendChild(node);
+  });
+  el.appendChild(g);
+});
+document.getElementById("upd").textContent = new Date().toLocaleDateString("th-TH");
+</script>
+</body>
+</html>
